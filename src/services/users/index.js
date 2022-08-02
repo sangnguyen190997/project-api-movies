@@ -29,7 +29,6 @@ const getUserByEmail = async (email) => {
         },
       ],
     });
-    console.log({ user });
     return user;
   } catch (errors) {
     console.log({ errors });

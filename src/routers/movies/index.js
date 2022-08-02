@@ -12,6 +12,49 @@ const {
 } = require("../../services/movies");
 const movieRouter = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Movie_VM:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         trailer:
+ *           type: string
+ *         poster:
+ *            type: string
+ *         description:
+ *            type: string
+ *         startTime:
+ *            type: string
+ *         evaluate:
+ *            type: integer
+ */
+
+/**
+ * @swagger
+ * /api/movies:
+ *   post:
+ *     tags: [Movies]
+ *     summary: Create movie
+ *     consumes:
+ *     - application/json:
+ *     parameters:
+ *       - in: body
+ *         name: nd
+ *         description: The movie to create.
+ *         schema:
+ *             $ref: '#/components/schemas/Movie_VM'
+ *     responses:
+ *       200:
+ *         content:
+ *         description: Success
+ *       404:
+ *         description: The user was not found
+ */
+
 //create movie
 movieRouter.post("/", async (req, res) => {
   const { name, trailer, poster, description, startTime, evaluate } = req.body;
@@ -35,6 +78,26 @@ movieRouter.post("/", async (req, res) => {
   res.status(200).send(movie);
 });
 
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   get:
+ *     summary: Get the movie by id
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The movie id
+ *     responses:
+ *       200:
+ *         description: The movie description by id
+ *       404:
+ *         description: The movie was not found
+ */
+
 //get movie by id
 movieRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
@@ -44,6 +107,28 @@ movieRouter.get("/:id", async (req, res) => {
   }
   res.status(200).send(movie);
 });
+
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   put:
+ *     tags: [Movies]
+ *     summary: Update movie
+ *     consumes:
+ *     - application/json:
+ *     parameters:
+ *       - in: body
+ *         name: nd
+ *         description: The user to create.
+ *         schema:
+ *             $ref: '#/components/schemas/Movie_VM'
+ *     responses:
+ *       200:
+ *         content:
+ *         description: Success
+ *       404:
+ *         description: The user was not found
+ */
 
 //update movie
 movieRouter.put("/:id", async (req, res) => {
@@ -66,6 +151,25 @@ movieRouter.put("/:id", async (req, res) => {
   res.status(200).send(data);
 });
 
+/**
+ * @swagger
+ * /api/movies/{id}:
+ *   delete:
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The movie id
+ *     responses:
+ *       200:
+ *         description: The movie description by id
+ *       404:
+ *         description: The movie was not found
+ */
+
 //delete movie
 movieRouter.delete(
   "/:id",
@@ -86,6 +190,26 @@ movieRouter.delete(
     res.status(200).send(`movie id ${id} deleted`);
   }
 );
+
+/**
+ * @swagger
+ * /api/movies:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Get users paganation
+ *     parameters:
+ *      - in: query
+ *        name: size
+ *        type: integer
+ *      - in: query
+ *        name: page
+ *        type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ *       404:
+ *         description: Value is invalid
+ */
 
 //paganation movie
 movieRouter.get("/", async (req, res) => {

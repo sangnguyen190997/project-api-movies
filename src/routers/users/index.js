@@ -19,13 +19,57 @@ const {
   storageAvatar,
   createAvatar,
   createTicket,
-  getMovieHistoryByUser,
   getPanigationPageUser,
 } = require("../../services/users");
 
-const { getAllMovies } = require("../../services/movies");
-
 const userRouter = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Movies Cinema
+ *   description: The movies managing API
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UserVM:
+ *       type: object
+ *       required:
+ *          - name
+ *       properties:
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ *         phone:
+ *            type: string
+ */
+
+/**
+ * @swagger
+ * /api/users/sign-up:
+ *   post:
+ *     tags: [Users]
+ *     consumes:
+ *     - application/json:
+ *     parameters:
+ *       - in: body
+ *         name: nd
+ *         description: The user to create.
+ *         schema:
+ *             $ref: '#/components/schemas/UserVM'
+ *     responses:
+ *       200:
+ *         content:
+ *         description: Success
+ *       404:
+ *         description: The user was not found
+ */
 
 //sign-up
 userRouter.post("/sign-up", async (req, res) => {
@@ -52,6 +96,41 @@ userRouter.post("/sign-up", async (req, res) => {
   res.status(200).send({ data, avatar });
 });
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     InfoUserVM:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ */
+
+/**
+ * @swagger
+ * /api/users/sign-in:
+ *   post:
+ *     tags: [Users]
+ *     consumes:
+ *     - application/json:
+ *     parameters:
+ *       - in: body
+ *         name: nd
+ *         description: The user sign-in.
+ *         schema:
+ *             $ref: '#/components/schemas/InfoUserVM'
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         schema:
+ *             $ref: "#/components/schemas/InfoUserVM"
+ *       404:
+ *         description: The user was not found
+ */
+
 //sign-in
 userRouter.post("/sign-in", async (req, res) => {
   const { email, password } = req.body;
@@ -74,6 +153,42 @@ userRouter.post("/sign-in", async (req, res) => {
   const token = genToken({ id: user.id });
   return res.status(200).send({ user, token });
 });
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User_VM:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *            type: string
+ */
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     tags: [Users]
+ *     consumes:
+ *     - application/json:
+ *     parameters:
+ *       - in: body
+ *         name: nd
+ *         description: The user to create.
+ *         schema:
+ *             $ref: '#/components/schemas/User_VM'
+ *     responses:
+ *       200:
+ *         content:
+ *         description: Success
+ *       404:
+ *         description: The user was not found
+ */
 
 //update user
 userRouter.put("/:id", async (req, res) => {
@@ -98,6 +213,25 @@ userRouter.put("/:id", async (req, res) => {
   res.status(200).send(data);
 });
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user id
+ *     responses:
+ *       200:
+ *         description: The user description by id
+ *       404:
+ *         description: The user was not found
+ */
+
 //delete user
 userRouter.delete("/:id", async (req, res) => {
   const { id } = req.params;
@@ -114,6 +248,26 @@ userRouter.delete("/:id", async (req, res) => {
   res.status(200).send(`user id ${id} deleted`);
 });
 
+/**
+ * @swagger
+ * /api/users/avatar:
+ *   post:
+ *     summary: Upload an avatar
+ *     tags: [Users]
+ *     requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: base64
+ *     responses:
+ *       200:
+ *         description: success
+ */
 //upload avatar
 userRouter.post("/avatar", [authenticate, uploadAvatar()], async (req, res) => {
   const user = req.user;
@@ -126,6 +280,22 @@ userRouter.post("/avatar", [authenticate, uploadAvatar()], async (req, res) => {
 
   res.status(200).send(avatar);
 });
+
+/**
+ * @swagger
+ * /api/users/ticket/{movieId}:
+ *   post:
+ *     tags: [Users]
+ *     summary: Create Ticket
+ *     parameters:
+ *      - in: query
+ *        name: movieId
+ *     responses:
+ *       200:
+ *         description: success
+ *       404:
+ *         description: The movie was not found
+ */
 
 //create ticket
 userRouter.post("/ticket/:movieId", [authenticate], async (req, res) => {
@@ -141,6 +311,20 @@ userRouter.post("/ticket/:movieId", [authenticate], async (req, res) => {
   res.status(200).send(ticket);
 });
 
+/**
+ * @swagger
+ * /api/users/history:
+ *   get:
+ *     tags: [Users]
+ *     parameters:
+ *      - in: query
+ *        name: authenticate
+ *     responses:
+ *       200:
+ *         description: success
+ *       403:
+ *         description: Token is invalid
+ */
 //get history
 userRouter.get("/history", [authenticate], async (req, res) => {
   const user = req.user;
@@ -154,6 +338,26 @@ userRouter.get("/history", [authenticate], async (req, res) => {
   res.status(200).send(data);
 });
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get the user by id
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user id
+ *     responses:
+ *       200:
+ *         description: The user description by id
+ *       404:
+ *         description: The user was not found
+ */
+
 //get detail user
 userRouter.get("/:id", async (req, res) => {
   const { id } = req.params;
@@ -165,6 +369,26 @@ userRouter.get("/:id", async (req, res) => {
   const user = await getUserById(id);
   res.status(200).send({ user });
 });
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get users paganation
+ *     parameters:
+ *      - in: query
+ *        name: size
+ *        type: integer
+ *      - in: query
+ *        name: page
+ *        type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ *       404:
+ *         description: Value is invalid
+ */
 
 //get panigation user
 userRouter.get("/", async (req, res) => {
